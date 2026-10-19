@@ -71,7 +71,7 @@ O manual do **ONE X2** afirma que o master `_00_` contém as duas lentes num arq
 ```
 VID_20260812_174444_00_004.insv   7.524.018.742 bytes   (lente traseira)
 VID_20260812_174444_10_004.insv   7.486.832.640 bytes   (lente frontal)
-LRV_20260812_174444_11_004.insv   2.132.000.000 bytes   (proxy)
+LRV_20260812_174444_11_004.insv   2.131.937.422 bytes   (proxy)
 ```
 
 Os dois VID têm a mesma duração (1.195,3 s) e contagem de frames praticamente idêntica
