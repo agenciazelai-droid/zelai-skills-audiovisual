@@ -178,11 +178,53 @@ errado, não só corrompido.
 
 ---
 
+## Procedimento por geração — o que fazer em cada caso
+
+### ONE X, ONE X2, X3 (as gerações de par de lente)
+
+1. **Identificar os pares** antes de extrair. Para cada `VID_<data>_<hora>_00_<seq>`
+   deve existir `VID_<data>_<hora>_10_<seq>` com o mesmo carimbo e a mesma sequência.
+2. **Extrair os dois juntos.** Ordenar a extração por nome garante isso naturalmente.
+3. **Nunca descartar os `_10_`** por "não terem metadados" — é a segunda lente.
+4. **Conferir pares órfãos.** Um `_00_` sem `_10_` significa que o índice daquele lado se
+   perdeu: o clipe não costura, e vale carving no espaço livre para procurar o par.
+5. Para abrir, manter os dois arquivos **na mesma pasta**. O Studio abre o `_00_` e
+   procura o par ao lado.
+
+### X4, X4 Air, X5, X6 (arquivo único)
+
+1. Um `.insv` por clipe, com as duas lentes dentro. Não há par a preservar.
+2. Resoluções maiores (8K): arquivos maiores, mais tempo de extração, mais espaço.
+3. O trailer de metadados vive no próprio arquivo — presença obrigatória.
+
+### Todas as gerações
+
+1. **Auditar pelas miniaturas**: cruzar `DCIM/Camera01/Thumb/*.bmp` com os vídeos. Toda
+   miniatura deve ter seu vídeo; o contrário é normal.
+2. **Não confiar na sequência numérica** para detectar perda — a câmera pula números.
+3. **Guardar os LRV até a validação terminar.** Descartar só depois de os masters
+   passarem na decodificação.
+
 ## Ferramenta oficial
 
 **Insta360 File Repair** v1.1 (29/12/2024), gratuita, Windows e macOS. Suporta ONE X,
 X2, X3, X4, X4 Air, X5 e X6. Repara `.insv` e `.mp4` com "stitching data lost" ou que
 abrem como dois panoramas.
+
+Procedimento oficial, conforme o manual:
+
+1. Baixar na página de downloads da Insta360, ao fim da página
+2. Abrir a ferramenta e selecionar o arquivo
+3. **Não mover o arquivo durante o reparo**
+4. **Não desligar o computador durante o processo**
+
+Requisitos declarados para o reparo automático funcionar: o arquivo precisa ser `.insv`
+ou `.mp4` gravado por câmera Insta360, **e** apresentar um destes sintomas — abre como
+dois panoramas esféricos no Studio, mostra "stitching data lost", ou dá erro ao importar.
+
+Se o arquivo não atender aos requisitos, o suporte da Insta360 atende 24/7 e aceita
+envio de arquivo para análise. Para material de cliente, essa é uma opção legítima antes
+de esgotar tentativas que podem piorar o estado.
 
 Download: página de downloads da Insta360, ao fim da página. O site bloqueia download
 automatizado (HTTP 403) — baixar pelo navegador.

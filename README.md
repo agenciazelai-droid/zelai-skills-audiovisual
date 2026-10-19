@@ -18,13 +18,37 @@ Conhecimento que não está em manual, escrito a partir de casos reais.
 Resgata vídeo e foto de cartão corrompido sem destruir o que o material precisa para
 ser usado.
 
+- **Triagem antes de tocar no cartão**: identifica a marca e a geração da câmera lendo a
+  própria estrutura do cartão, confere espaço no destino, e **recusa seguir** se o
+  destino estiver na própria origem
+- **Lista de ações proibidas** — o que nunca executar, nem se pedido, e o que fazer em vez
 - Diagnóstico do exFAT em **leitura pura** — zero escrita, zero espaço em disco
 - A pergunta que decide tudo: **o índice ainda está lá?**
 - Extração seguindo o índice, preservando o **trailer de metadados** que o carving joga fora
-- Conhecimento modelo por modelo: **Insta360 ONE X → X6** e **Sony M4ROOT/XDROOT**
+- Manual de procedimentos por marca e geração: **Insta360 ONE X → X6** e **Sony
+  M4ROOT/XDROOT**, incluindo os arquivos `.rsv`
+- **Diário de erros** que cresce a cada caso — inclusive os erros de quem escreveu a skill
 - Conserto cirúrgico do boot sector para devolver o cartão ao uso
 - Validação que decodifica frames no **início, meio e fim** — container que abre não é vídeo válido
 - Modelos de relatório técnico e de comunicado ao cliente
+
+### A detecção de câmera é automática
+
+O cartão diz qual câmera o gravou, se souber onde olhar. A triagem lê a estrutura e
+conclui:
+
+```
+--- Quem gravou este cartao ---
+  Marca   : INSTA360
+  Geracao : ONE X2 - LRV com extensao .insv confirma esta geracao
+
+  * CRITICO: 2 clipe(s) em par _00_/_10_. Os dois arquivos do par sao obrigatorios;
+  * recuperar so um lado entrega clipe que NAO costura o 360.
+```
+
+`M4ROOT` → Sony híbrida · `XDROOT` → Sony profissional · pares `_00_`/`_10_` → Insta360
+até o X3 · um `.insv` só → X4 em diante · LRV `.insv` → ONE X2 · LRV `.lrv` → X3+ ·
+`.rsv` presente → gravação Sony interrompida, **não apagar**.
 
 **Cobre:** cartão RAW · "é preciso formatar o disco" · DCIM vazia · `.insv` que abre como
 dois círculos · "stitching data lost" · "moov atom not found" · extração interrompida ·
@@ -88,12 +112,14 @@ Honestidade sobre o que foi testado, porque aqui a diferença importa:
 
 | Script | Plataforma | Estado |
 |---|---|---|
+| `00-triagem.ps1` | Windows | **testado** contra imagem exFAT: detectou marca e geração |
 | `02-diagnostico-exfat.ps1` | Windows | **validado em cartão real** (128 GB, ONE X2) |
 | `03-extrair.ps1` | Windows | **validado**: 43 arquivos, 95,84 GiB, zero falhas |
 | `04-validar.ps1` | Windows | **validado** nos 43 arquivos |
 | `05-diagnosticar-boot.ps1` | Windows | **validado**: localizou os 103 bytes |
 | `06-consertar-boot.ps1` | Windows | **validado**: cartão voltou a montar |
 | `01-criar-imagem.ps1` | Windows | lógica revisada, não exercitado em caso real |
+| `00-triagem.sh` | macOS/Linux | **testado** contra imagem exFAT, mesma saída da versão Windows |
 | `02-diagnostico-exfat.sh` | macOS/Linux | **parsing provado** contra imagem exFAT real |
 | `03-extrair.sh` | macOS/Linux | **extração provada byte a byte**: 6/6 idênticos por SHA-256 |
 | `04-validar.sh`, `05`, `06` | macOS/Linux | **ainda não escritos** |

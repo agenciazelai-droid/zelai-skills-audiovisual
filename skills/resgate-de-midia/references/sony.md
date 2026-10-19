@@ -142,6 +142,33 @@ Confundir os dois leva a formatar um cartão que estava íntegro.
 
 ---
 
+## Procedimento por linha — o que fazer em cada caso
+
+### Linha híbrida (A7, FX3, FX30, ZV) — `M4ROOT`
+
+1. Procurar `.rsv` **antes de tudo**. Se houver, tratar primeiro (ver acima).
+2. Extrair a árvore completa a partir de `PRIVATE/` — não só `CLIP/`.
+3. Conferir que cada `C####.MP4` tem seu `C####M01.XML` ao lado.
+4. Criar **uma pasta por cartão** no destino: `C0001` colide entre cartões.
+5. Identificar o codec (`XAVC S` long-GOP ou `XAVC S-I` intra) — define a tolerância a
+   truncamento.
+6. Não esquecer `SUB/` se os proxies importarem ao fluxo de edição.
+
+### Linha profissional (FX6, FX9, PXW, VENICE) — `XDROOT`
+
+1. Procurar `.rsv` primeiro. Em VENICE, takes X-OCN interrompidos seguem o mesmo esquema.
+2. Extrair a árvore completa a partir de `PRIVATE/XDROOT/`, incluindo `General/LUT/`.
+3. Clipe `.MXF` sem o XML ao lado chega ao NLE sem timecode e sem identificação de lente.
+4. Em XAVC-I (intra-frame), arquivo truncado perde só o que vem depois do corte — o
+   resto decodifica. Em XAVC-L, o corte estraga o GOP inteiro.
+
+### Todas as linhas
+
+1. **Copiar o cartão inteiro, não clipes avulsos.** Esta é a diferença mais importante
+   em relação à Insta360.
+2. Se a estrutura saiu desmontada (carving), **recolocar os clipes em `CLIP/`** junto dos
+   XMLs antes de entregar — é o que faz o NLE reconhecê-los.
+
 ## Ferramenta oficial
 
 A Sony distribui um aplicativo de recuperação para cartões **XQD/CFexpress** que

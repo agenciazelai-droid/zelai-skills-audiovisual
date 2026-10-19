@@ -3,47 +3,130 @@ name: resgate-de-midia
 description: >
   Resgata vídeo e foto de cartão de memória corrompido de câmera (Insta360 linha X,
   Sony XAVC/XDCAM, GoPro, DSLR) sem destruir os metadados que o material precisa para
-  ser usado. Cobre cartão que pede formatação, cartão RAW, arquivo .insv que não abre,
-  vídeo truncado sem moov atom, clipe que aparece como dois círculos de peixe-olho, e
-  extração interrompida. Esta skill deve ser usada sempre que o usuário mencionar
-  "cartão corrompido", "cartão pede para formatar", "cartão RAW", "perdi os vídeos",
-  "perdi a filmagem", "o cartão não abre", "o cartão sumiu com os arquivos", "arquivo
-  .insv não abre", "insv corrompido", "vídeo corrompido", "vídeo não abre", "stitching
-  data lost", "moov atom not found", "recuperar cartão", "recuperar filmagem",
-  "recuperar material do cliente", "formatei o cartão sem querer", "corrupted SD card",
-  "card asks to format", "RAW card", "recover footage", "insv won't open", "corrupted
-  video", "camera card not mounting" — e também quando o usuário descrever o problema
-  sem usar essas palavras, por exemplo "o cartão do cliente deu problema na hora de
-  copiar" ou "a câmera travou gravando e agora não acha nada". Usar ANTES de sugerir
-  qualquer software de recuperação, porque a ordem das ações decide se o material é
-  recuperável.
+  ser usado. Conduz uma triagem antes de tocar no cartão, identifica a marca e a geração
+  da câmera pela própria estrutura do cartão, confere espaço no destino, e extrai do
+  cartão para um diretório escolhido pelo usuário sem nunca escrever na origem.
+  Cobre cartão que pede formatação, cartão RAW, arquivo .insv que não abre, vídeo
+  truncado sem moov atom, clipe que aparece como dois círculos de peixe-olho, extração
+  interrompida e arquivos .rsv da Sony. Esta skill deve ser usada sempre que o usuário
+  mencionar "cartão corrompido", "cartão pede para formatar", "cartão RAW", "perdi os
+  vídeos", "perdi a filmagem", "o cartão não abre", "o cartão sumiu com os arquivos",
+  "arquivo .insv não abre", "insv corrompido", "vídeo corrompido", "vídeo não abre",
+  "stitching data lost", "moov atom not found", "recuperar cartão", "recuperar
+  filmagem", "recuperar material do cliente", "formatei o cartão sem querer",
+  "corrupted SD card", "card asks to format", "RAW card", "recover footage", "insv
+  won't open", "corrupted video", "camera card not mounting" — e também quando o
+  usuário descrever o problema sem usar essas palavras, por exemplo "o cartão do
+  cliente deu problema na hora de copiar" ou "a câmera travou gravando e agora não acha
+  nada". Usar ANTES de sugerir qualquer software de recuperação, porque a ordem das
+  ações decide se o material é recuperável.
 ---
 
 # Resgate de mídia de cartão de câmera
 
-Esta skill existe porque o caminho que a internet ensina — baixar um recuperador e
-mandar escanear — é o caminho que **destrói** material de câmera 360 e profissional.
-O carving por assinatura devolve arquivos que abrem e não servem: sem o trailer de
-metadados, um `.insv` não costura, e um clipe Sony perde o XML que o NLE lê.
+## O que está em jogo
 
-A ordem correta começa com uma pergunta que quase ninguém faz: **o índice do sistema
-de arquivos ainda está lá?** Na maioria dos casos de "cartão pede para formatar", está.
+O material num cartão de câmera é **irrepetível**. Não existe segunda tomada de um
+casamento, de uma viagem, de um evento. Quem traz o cartão costuma estar entregando a
+única cópia que existe no mundo.
 
-## Regra zero: o cartão sai do caminho de escrita
+Por isso esta skill não otimiza velocidade nem elegância. Ela otimiza **não destruir**.
+Toda vez que houver escolha entre agir rápido e agir reversível, escolher reversível.
+Toda vez que houver dúvida, **parar e perguntar** — o custo de perguntar é um minuto, o
+custo de errar é o material.
 
-Aplicar antes de qualquer diagnóstico, sempre, sem exceção:
+E o caminho que a internet ensina — baixar um recuperador e mandar escanear — é o que
+**destrói** material de câmera 360 e profissional. O carving por assinatura devolve
+arquivos que abrem e não servem: sem o trailer de metadados, um `.insv` não costura.
 
-1. **Recusar o "verificar e reparar a unidade" do Windows e o "reparar" do macOS.**
-   O `chkdsk` e o `fsck` escrevem no cartão e destroem as cadeias FAT residuais — que
-   são exatamente o que a remontagem usa. Este é o único passo verdadeiramente
-   irreversível de todo o processo.
-2. **Não devolver o cartão à câmera.** Ligar a câmera pode reescrever o índice e
-   renumerar arquivos.
-3. **Não formatar**, nem "formatação rápida", nem pela câmera.
-4. **Abrir o dispositivo somente em leitura** em toda ferramenta e todo script.
-5. **Confirmar a identidade do disco pelo modelo, nunca pelo tamanho.** Dois discos de
-   119 GiB numa mesma máquina são indistinguíveis por tamanho, e apontar a ferramenta
-   para o disco errado é o acidente mais fácil de cometer.
+**Antes de operar, ler `references/licoes-de-campo.md`.** Ele lista as formas pelas
+quais estas ferramentas já mentiram — incluindo um caso em que o relatório de validação
+disse "43 válidos" sem ter verificado os arquivos grandes.
+
+---
+
+## Proibido — não executar, nem se pedido
+
+Estas ações destroem material e **não** devem ser executadas nem sugeridas, mesmo que o
+usuário peça. Diante de um pedido assim, explicar o que a ação faz e oferecer a
+alternativa:
+
+| Nunca | Por quê | Em vez disso |
+|---|---|---|
+| `chkdsk`, "Reparar unidade", "Verificar e corrigir" | **escreve no cartão** e destrói as cadeias FAT residuais que a recuperação usa | ler o índice com `02-diagnostico-exfat` |
+| `fsck`, Primeiros Socorros do Disk Utility | o mesmo, no macOS | idem |
+| `diskutil eraseDisk`, `format`, formatação rápida | apaga o índice | nada; o cartão não precisa ser formatado para ser lido |
+| Montar o cartão na câmera para "testar" | a câmera pode reescrever o índice e renumerar arquivos | leitura por software, com o cartão num leitor |
+| Gravar qualquer coisa no cartão | cada escrita pode cair sobre dado não recuperado | destino **sempre** em outro disco |
+| Apagar arquivo `.rsv` da Sony | parece lixo e **contém o material** da gravação interrompida | ver `references/sony.md` |
+| Apagar os arquivos `_10_` do Insta360 por "não terem metadados" | é a segunda lente; sem ela não há 360 | ver `references/insta360-linha-x.md` |
+| Rodar recuperador antes do diagnóstico | pode entregar carving quando a extração pelo índice estava disponível | Passo 0 e Passo 1 |
+
+Se o usuário insistir numa dessas após a explicação, a decisão é dele — mas registrar
+que foi informado, e nunca executar como se fosse rotina.
+
+## Antes de escrever qualquer byte — protocolo de parada
+
+Vale para **toda** operação que escreve: no destino, no cartão, em qualquer lugar.
+Antes de executar, declarar ao usuário, em texto:
+
+1. **Onde** vai escrever (caminho completo) e **onde não** vai
+2. **Quantos bytes**
+3. **O que é perdido** se der errado, e se existe como desfazer
+4. **Quantas cópias do material existem** neste momento
+
+Se o material existir em **um só lugar**, nenhuma escrita no cartão é autorizada — nem o
+conserto do boot sector. Essa regra não tem exceção por conveniência ou por pressa.
+
+Nunca executar um comando com `-Escrever`, `-Force`, `rm`, `mv` sobre material de
+cliente, ou formatação, sem confirmação explícita no turno.
+
+---
+
+## Passo 0 — Triagem, antes de tocar no cartão
+
+Rodar primeiro:
+
+```powershell
+.\scripts\windows\00-triagem.ps1                                  # lista os candidatos
+.\scripts\windows\00-triagem.ps1 -DiskNumber <N> -Destino '<pasta>'
+```
+```bash
+sudo ./scripts/mac/00-triagem.sh                                  # lista
+sudo ./scripts/mac/00-triagem.sh /dev/rdiskN ~/resgate/cliente-x
+```
+
+O script descobre sozinho: quais discos são candidatos, **qual marca e geração de câmera
+gravou o cartão** (pela estrutura de pastas e pelo padrão dos nomes), quanto material
+existe, e se o destino escolhido tem espaço. Ele recusa seguir se o destino estiver no
+próprio cartão.
+
+### O que o script não sabe — perguntar ao usuário
+
+Estas respostas mudam o que ainda é possível. Perguntar **antes** de executar qualquer
+coisa, de preferência com uma pergunta estruturada:
+
+1. **O cartão voltou para a câmera** depois do problema?
+2. **Rodou `chkdsk`, "reparar unidade" ou Primeiros Socorros?**
+3. **Algum programa de recuperação já passou nele?** Qual?
+4. **Houve formatação**, mesmo rápida?
+5. **Qual o modelo exato da câmera?** (confirma o que a estrutura sugeriu)
+6. **Onde devem ficar os arquivos recuperados?** Caminho completo, em outro disco.
+7. **Falta material que nem aparece na lista?** Quantos clipes a pessoa lembra de ter gravado?
+
+"Sim" em 2, 3 ou 4 reduz as chances e muda o caminho. A pergunta 7 é a única forma de
+descobrir material cujo índice se perdeu — e a resposta define se vale carving depois.
+Detalhe de como interpretar cada resposta em `references/triagem.md`.
+
+### A regra do destino
+
+O material **sai do cartão para um diretório escolhido pelo usuário, em outro disco**.
+O cartão é fonte somente-leitura, do começo ao fim. Nunca propor o próprio cartão como
+destino, nem usar pasta que já tenha conteúdo de outro cartão — numeração de câmera
+Sony reinicia em `C0001` a cada formatação, e dois cartões sobrescrevem um ao outro sem
+aviso.
+
+---
 
 ## Triagem por sintoma
 
@@ -55,118 +138,87 @@ Aplicar antes de qualquer diagnóstico, sempre, sem exceção:
 | Arquivos aparecem íntegros mas não abrem | container do arquivo | Passo 5 |
 | `.insv` abre como dois círculos / "stitching data lost" | trailer de metadados | Passo 5 |
 | "moov atom not found" | container truncado | Passo 5 |
+| Existe arquivo `.rsv` (Sony) | gravação não finalizada | `references/sony.md` |
 | Cartão não é reconhecido de jeito nenhum | possível falha física | laboratório; parar aqui |
 
-Nunca reparar arquivo antes de recuperar a estrutura: sem a estrutura, não existe
-arquivo para reparar.
+Nunca reparar arquivo antes de recuperar a estrutura: sem estrutura, não existe arquivo
+para reparar.
 
 ## Passo 1 — Ler o índice antes de escolher ferramenta
 
-Executar o diagnóstico de leitura pura. Ele não escreve, não ocupa espaço e responde o
-que define todo o resto:
-
 ```powershell
-# Windows, PowerShell COMO ADMINISTRADOR
 .\scripts\windows\02-diagnostico-exfat.ps1 -DiskNumber <N>
 ```
-```bash
-# macOS/Linux
-sudo ./scripts/mac/02-diagnostico-exfat.sh /dev/rdiskN
-```
 
-Ler, nessa ordem: MBR/GPT → VBR (principal; se falhar, o backup no setor 12) → FAT →
-diretório raiz → bitmap de alocação.
+Leitura pura: não escreve, não ocupa espaço. Ler MBR → VBR (principal; se falhar, o
+backup no setor 12) → FAT → diretório raiz → bitmap de alocação.
 
-**O teste que decide:** comparar a soma dos tamanhos das entradas de diretório com os
-clusters marcados no bitmap de alocação. Se os dois números coincidem, o índice está
-íntegro e o material sai inteiro pelo Passo 3 — sem imagem, sem carving, sem reparo.
+**O teste que decide:** comparar a soma dos tamanhos no diretório com os clusters
+marcados no bitmap. Coincidem → índice íntegro, o material sai inteiro pelo Passo 3.
 
-Consultar `references/exfat.md` para a estrutura e os offsets, e
-`references/escolher-caminho.md` para a árvore de decisão completa.
+**Se o diagnóstico apontar dano uniforme em 100% dos arquivos, suspeitar do código antes
+do cartão.** Dano real é irregular. Ver L04 em `references/licoes-de-campo.md`.
 
-## Passo 2 — Decidir se a imagem bit-a-bit é necessária
+## Passo 2 — Decidir se a imagem é necessária
 
-A imagem protege **tentativas destrutivas repetidas**. Quando o índice está íntegro,
-não existe nenhuma: a extração é leitura dirigida. Nesse caso a imagem só custa espaço
-— e costuma ser o que inviabiliza o trabalho, porque exige o dobro da capacidade do
-cartão.
+A imagem protege tentativas destrutivas repetidas. Com índice íntegro não existe
+nenhuma, e a imagem exige o dobro da capacidade do cartão — o que costuma inviabilizar
+o trabalho. Fazer imagem quando o índice estiver danificado, houver setores ilegíveis,
+ou o caso for de perícia.
 
-Fazer imagem quando: o índice estiver danificado, houver setores ilegíveis, ou o caso
-for de perícia. Usar `01-criar-imagem.ps1`, que registra setores ruins e permite
-retomar. Diante de erros de leitura, trocar para `ddrescue` ou HDDSuperClone, que têm
-estratégia de releitura.
-
-## Passo 3 — Extrair pelo índice (caminho preferido)
-
-Seguir a cadeia de clusters de cada arquivo e gravar byte a byte no destino, com nome,
-caminho e data originais. Isso preserva **o arquivo inteiro**, incluindo o trailer
-proprietário que o carving descartaria.
+## Passo 3 — Extrair pelo índice
 
 ```powershell
-.\scripts\windows\03-extrair.ps1 -DiskNumber <N> -Classes essencial -Simular
-.\scripts\windows\03-extrair.ps1 -DiskNumber <N> -Classes essencial
+.\scripts\windows\03-extrair.ps1 -DiskNumber <N> -Destino '<pasta>' -Classes essencial -Simular
+.\scripts\windows\03-extrair.ps1 -DiskNumber <N> -Destino '<pasta>' -Classes essencial
 ```
 
-Simular primeiro: a simulação percorre todas as cadeias e prova que estão completas
-antes de escrever o primeiro byte no destino.
+Simular sempre primeiro: a simulação percorre todas as cadeias e prova que estão
+completas antes de escrever o primeiro byte.
 
-**Priorizar por papel do arquivo quando o espaço aprecia.** Masters primeiro, proxies
-(LRV, `Sub/`) depois — eles só importam se um master falhar na validação.
-
-**Garantir que os pares de lente saiam juntos.** Em ONE X, ONE X2 e X3 acima de 5.7K,
-cada clipe 360 são dois arquivos; recuperar um sem o outro entrega um clipe inútil.
-Consultar `references/insta360-linha-x.md` para a matriz modelo por modelo — ela mudou
-no X4 e o manual oficial do X2 está errado a respeito.
+Masters primeiro, proxies depois. **Pares de lente saem juntos** — em ONE X, ONE X2 e X3
+acima de 5.7K, cada clipe 360 são dois arquivos, e um sem o outro é inútil.
 
 ## Passo 4 — Carving, só quando o índice se perdeu
 
-Quando o diagnóstico não achar VBR nem cadeias utilizáveis, aí sim PhotoRec sobre a
-imagem. Saber de antemão o que se perde:
-
-- **PhotoRec não conhece a assinatura `.insv`** (verificado no binário 7.2): os vídeos
-  saem como `.mov`/`.mp4`. Renomear para `.insv` depois.
-- Nomes originais, pastas e datas não voltam.
-- O corte por assinatura pode truncar o trailer de metadados.
-
-Para remontar clipes fragmentados a partir das cadeias FAT residuais, usar
-`seungwoochoe/insta360-footage-recovery` como referência de método. Ver
-`references/ferramentas.md`.
+PhotoRec sobre a imagem. Saber o que se perde: nomes, pastas, datas e, possivelmente, o
+trailer de metadados. **O PhotoRec não conhece a assinatura `.insv`** — os vídeos saem
+como `.mov`/`.mp4` e basta renomear. Ver `references/ferramentas.md`.
 
 ## Passo 5 — Reparar containers
 
-Aplicar somente a arquivos que já foram copiados inteiros:
-
-1. **Insta360 File Repair** (oficial, gratuito, Windows/macOS) — para `.insv` com
-   "stitching data lost" ou que abre como dois círculos. Suporta ONE X até X6.
-2. **anthwlock/untrunc** — para clipe truncado sem `moov atom`. Exige arquivo de
-   referência da **mesma câmera, mesmo modo e mesma resolução**. Esse arquivo é
-   gratuito: gravar um clipe novo de 30 segundos em outro cartão.
-3. **kichiki/finsta360** — alternativa que reconstrói o `moov` a partir de referência.
-4. **alex-plekhanov/insvtools** (`replace-meta`) — transplantar metadados de um clipe
-   bom para um recuperado.
+Só em arquivo já copiado inteiro. Insta360 File Repair (oficial) para "stitching data
+lost"; `untrunc` para truncado sem `moov atom`, com arquivo de referência gravado pela
+mesma câmera em **outro cartão**. Detalhes em `references/ferramentas.md`.
 
 ## Passo 6 — Validar antes de entregar
-
-Container que abre não é vídeo válido. Validar cada arquivo:
 
 ```powershell
 .\scripts\windows\04-validar.ps1
 ```
 
-A validação confere quatro coisas: tamanho contra o índice do cartão, leitura do
-container pelo `ffprobe`, **decodificação de frames no início, no meio e no fim**, e
-presença do trailer de metadados do fabricante.
+Confere tamanho contra o índice, leitura do container, **decodificação de frames no
+início, meio e fim**, e o trailer de metadados. Container que abre não é vídeo válido.
 
-Entregar ao cliente usando `templates/relatorio-tecnico.md` e
-`templates/comunicado-cliente.md`. Declarar sempre o que **não** foi recuperado.
+### As três perguntas antes de declarar sucesso
+
+1. O que foi verificado de verdade, e o que foi presumido?
+2. Se este número estivesse errado, eu perceberia?
+3. O que eu afirmaria ao cliente agora que não posso provar?
+
+Se algum número de verificação não fechar com a conta esperada, **parar e investigar** —
+não arredondar a explicação. Foi assim que um relatório verde esconder arquivos não
+verificados (L05).
+
+## Entrega
+
+Usar `templates/relatorio-tecnico.md` e `templates/comunicado-cliente.md`. **Declarar
+sempre o que não foi recuperado**, com nome e horário, não em nota de pé.
 
 ## Devolver o cartão ao uso
 
-Opcional, e **somente depois de o material existir em dois lugares**.
-
-Quando o diagnóstico apontar checksum da região de boot inconsistente, o conserto é
-cirúrgico: copiar o setor divergente da região de backup sobre a principal. Provar a
-correção em memória antes de escrever:
+Somente depois de o material existir em **dois lugares**. Provar a correção em memória
+antes de escrever; são 512 bytes e existe como desfazer.
 
 ```powershell
 .\scripts\windows\06-consertar-boot.ps1 -DiskNumber <N>                                # prova
@@ -174,29 +226,34 @@ correção em memória antes de escrever:
 .\scripts\windows\06-consertar-boot.ps1 -DiskNumber <N> -Desfazer                      # reverte
 ```
 
-Em caso real, **103 bytes corrompidos num setor de 512 trancaram 112 GiB** de material
-perfeitamente íntegro. A escrita foi de 512 bytes.
+## Depois do caso — alimentar a skill
 
-## Prevenção, para dizer ao cliente no fim
+Acrescentar entrada em `references/licoes-de-campo.md` quando houver: erro que deixou o
+relatório verde sem verificar, caminho que piorou o estado, comportamento de câmera que
+contrariou a documentação, ou número que não fechou.
 
-A causa mais comum desse dano é **remoção do cartão durante escrita** — inclusive uma
-cópia interrompida. Ejetar sempre pelo sistema, nos dois sistemas operacionais. E
-nunca formatar o cartão antes de o material estar verificado por checksum no destino.
+---
 
 ## Recursos desta skill
 
-### Referências
-- **`references/escolher-caminho.md`** — árvore de decisão: índice × imagem × carving × reparo
-- **`references/exfat.md`** — estrutura do exFAT, checksum da região de boot, onde o dano mora
-- **`references/insta360-linha-x.md`** — matriz ONE X → X6: arquivos por clipe, nomenclatura, trailer
-- **`references/sony.md`** — M4ROOT, XDROOT, XAVC, XMLs e proxies
-- **`references/ferramentas.md`** — TestDisk, PhotoRec, untrunc, finsta360, insvtools, serviços pagos
-- **`references/armadilhas-powershell.md`** — erros que fazem a verificação mentir em silêncio
+### Leitura obrigatória antes de operar
+- **`references/licoes-de-campo.md`** — o diário de erros: como estas ferramentas já mentiram
+
+### Manuais por marca
+- **`references/insta360-linha-x.md`** — ONE X → X6: arquivos por clipe, trailer, procedimentos
+- **`references/sony.md`** — M4ROOT, XDROOT, XAVC, arquivos `.rsv`, procedimentos
+
+### Procedimento
+- **`references/triagem.md`** — o roteiro de perguntas e o que cada resposta muda
+- **`references/escolher-caminho.md`** — índice × imagem × carving × reparo
+- **`references/exfat.md`** — estrutura, checksum da região de boot, onde o dano mora
+- **`references/ferramentas.md`** — o que cada ferramenta faz e o que estraga
+- **`references/armadilhas-powershell.md`** — erros que fazem a verificação mentir
 
 ### Scripts
-- **`scripts/windows/`** — 6 scripts PowerShell, validados num caso real de 112 GiB
-- **`scripts/mac/`** — equivalentes em bash. **Não testados em hardware macOS** — revisar antes de usar em material único
+- **`scripts/windows/`** — 7 scripts PowerShell, validados num caso real de 112 GiB
+- **`scripts/mac/`** — bash. Parsing e extração provados por SHA-256 contra imagem exFAT;
+  **acesso a dispositivo em macOS ainda não exercitado**
 
-### Modelos de entrega
-- **`templates/relatorio-tecnico.md`** — o que foi feito, o que foi verificado
-- **`templates/comunicado-cliente.md`** — linguagem sem jargão, incluindo o que não voltou
+### Entrega
+- **`templates/relatorio-tecnico.md`** e **`templates/comunicado-cliente.md`**
