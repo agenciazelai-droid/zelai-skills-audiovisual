@@ -67,8 +67,8 @@ Clonar dentro da pasta de skills:
 
 ```bash
 # pessoal (vale em todos os projetos)
-git clone https://github.com/<usuario>/zelai-skills.git ~/.claude/skills-zelai
-cp -r ~/.claude/skills-zelai/skills/* ~/.claude/skills/
+git clone https://github.com/agenciazelai-droid/zelai-skills-audiovisual.git ~/.claude/skills-av
+cp -r ~/.claude/skills-av/skills/* ~/.claude/skills/
 
 # ou apenas uma skill
 cp -r skills/resgate-de-midia ~/.claude/skills/
