@@ -1,0 +1,15 @@
+# Script .sh com CRLF nao roda no macOS/Linux: "bad interpreter".
+# Forcar LF nos scripts shell, independente do sistema de quem commita.
+*.sh    text eol=lf
+
+# PowerShell 5.1 e sensivel a encoding; manter CRLF no Windows.
+*.ps1   text eol=crlf
+
+# Markdown e o resto: normalizar na entrada, deixar o sistema decidir na saida.
+*.md    text
+*       text=auto
+
+# Binarios, se algum dia entrarem
+*.png   binary
+*.jpg   binary
+*.bin   binary

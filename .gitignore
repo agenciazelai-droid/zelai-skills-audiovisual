@@ -1,0 +1,43 @@
+# Nunca versionar material recuperado nem imagem de cartão
+recuperado/
+recuperacao/
+imagem/
+*.img
+*.dd
+*.vhd
+*.e01
+*.insv
+*.lrv
+*.mp4
+*.mov
+*.mxf
+*.insp
+*.dng
+
+# Logs e saídas de execução
+log/
+*.log
+saida-*.txt
+diagnostico*.txt
+extracao*.txt
+validacao*.txt
+conserto*.txt
+boot-original-*.bin
+inventario.csv
+MANIFESTO.txt
+
+# Ferramentas baixadas
+ferramentas/
+testdisk-*/
+untrunc_*/
+ffmpeg-*/
+*.zip
+
+# Sistema
+.DS_Store
+._*
+.Spotlight-V100
+.fseventsd
+.Trashes
+Thumbs.db
+desktop.ini
